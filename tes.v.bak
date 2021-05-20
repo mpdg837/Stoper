@@ -1,0 +1,8 @@
+module tes(
+	input in;
+	output out;
+);
+
+out = in;
+
+endmodule

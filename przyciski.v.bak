@@ -1,0 +1,98 @@
+module input_div(
+	input clk,
+	output clkm
+);
+
+
+reg[7:0] lic = 8'b0;
+reg[7:0] nlic = 8'b0;
+
+reg clka = 1'b0;
+reg nclka = 1'b0;
+
+always@( posedge clk )begin
+	clka <= nclka;
+	lic <= nlic;
+end
+
+always@ ( * )begin
+	nlic = lic + 1;
+	nclka = clka;
+	
+	if(nlic == 8'b0) begin
+		nclka = ~clka;
+	end
+end
+
+assign clkm = nclka;
+
+endmodule
+
+module przycisk(
+	input mode,
+	input in,
+	input clk,
+	output press,
+	output spress
+
+);
+
+reg[7:0] lic = 8'b0;
+reg[7:0] nlic = 8'b0;
+reg snd = 1'b0;
+reg nsnd = 1'b0;
+
+reg switch = 1'b0;
+reg nswitch = 1'b0;
+
+always@ ( posedge clk )begin
+	
+	snd <= nsnd;
+	lic <= nlic;
+	switch <= nswitch;
+end
+
+always@ ( * )begin
+	// Pompka przycisku
+	nsnd = snd;
+	nlic = 8'd0;
+	nswitch = switch;
+	
+	if(in) begin
+		
+		if(nlic < 8'd255) begin
+			nlic = lic + 1;
+		end
+	
+		if(nlic > 8'd250) begin
+			if( ~snd ) begin
+				nswitch = ~switch;
+			end
+		
+			nsnd = 1; 
+			
+		end
+	
+	end else
+	begin
+		if(nlic > 0) begin
+			nlic = lic - 1;
+		end
+		
+		if(nlic < 8'd50) begin
+			nsnd = 0;
+		end
+		
+	end
+	
+	
+	if(~mode) begin
+		nswitch = nsnd;
+	end
+end
+
+
+assign press = switch;
+assign spress = in;
+
+endmodule

@@ -1,0 +1,134 @@
+
+
+module counter50 (
+	input clk0,
+	output clk
+);
+
+// 1 MHz
+reg[5:0] lic = 6'b0;
+reg[5:0] nlic = 6'b0;
+
+reg clka = 1'b0;
+reg nclka = 1'b0;
+
+always@( posedge clk0 )begin
+	clka <= nclka;
+	lic <= nlic;
+end
+
+always@ ( * )begin
+	nlic = lic + 1;
+	nclka = clka;
+	
+	if(nlic == 6'd50) begin
+		nclka = ~clka;
+		nlic = 6'b0;
+	end
+end
+
+assign clk = nclka;
+
+endmodule
+
+
+
+module display(
+	input clk,
+	
+	input[6:0] number1,
+	input[6:0] number2,
+	input[6:0] number3,
+	input[6:0] number4,
+	
+	output[6:0] fnumber,
+	output[3:0] select
+);
+
+reg[6:0] fnumberx;
+reg[3:0] ssselect = 4'd0;
+reg[3:0] sselect;
+
+reg[1:0] numx=2'd0;
+reg[1:0] nnumx=2'd0;
+reg savebit=0;
+
+always@(posedge clk)begin
+
+	
+	fnumberx <= ffnumberx;
+	sselect <= ssselect;
+	numx <= nnumx;
+	pik <=npik;
+end
+
+reg[6:0] ffnumberx;
+reg[11:0] pik = 0;
+reg[11:0] npik = 0;
+always@( * )begin
+
+	npik = pik + 1;
+	nnumx = numx;
+	ssselect = select;
+	
+	ffnumberx = fnumberx;
+		
+	case(nnumx)
+		0: ssselect = 4'b1110;
+		1: ssselect = 4'b1101;
+		2: ssselect = 4'b1011;
+		3: ssselect = 4'b0111;
+			
+	endcase
+	
+	if(npik == 0)begin
+	
+		nnumx = numx + 1;
+		
+		case(nnumx)
+			0: ffnumberx = number1;
+			1: ffnumberx = number2;
+			2: ffnumberx = number3;
+			3: ffnumberx = number4;
+			
+		endcase
+	
+		
+	end
+end
+
+
+assign fnumber = fnumberx;
+
+assign select = sselect;
+endmodule
+
+
+
+module seg7(
+	input[3:0] cyfra,
+	
+	output[6:0] led
+);
+
+reg[6:0] seg;
+always@( * )begin
+	case(cyfra) 
+		4'd0 : seg = 7'b0000001;
+      4'd1 : seg = 7'b1001111;
+      4'd2 : seg = 7'b0010010;
+      4'd3 : seg = 7'b0000110;
+      4'd4 : seg = 7'b1001100;
+      4'd5 : seg = 7'b0100100;
+      4'd6 : seg = 7'b0100000;
+      4'd7 : seg = 7'b0001111;
+      4'd8 : seg = 7'b0000000;
+      4'd9 : seg = 7'b0000100;
+      default : seg = 7'b1111111; 
+	endcase
+	
+end
+
+assign led = seg;
+
+endmodule
